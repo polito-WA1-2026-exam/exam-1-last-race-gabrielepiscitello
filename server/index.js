@@ -1,12 +1,19 @@
-// imports
-import express from "express";
+import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import session from 'express-session';
+import fs from 'fs';
+import db from './db.js';
 
-// init express
-const app = new express();
+// --- Init Express ---
+const app = express();
 const port = 3001;
+
+// --- Run DB schema ---
+const schema = fs.readFileSync('./schema.sql', 'utf-8');
+db.exec(schema, (err) => {
+  if (err) throw err;
+});
 
 // --- Middleware ---
 app.use(morgan('dev'));
@@ -29,7 +36,7 @@ app.get('/api/ping', (req, res) => {
   res.json({ message: 'ok' });
 });
 
-// activate the server
+// --- Start server ---
 app.listen(port, () => {
   console.log(`Server listening at http://localhost:${port}`);
 });
