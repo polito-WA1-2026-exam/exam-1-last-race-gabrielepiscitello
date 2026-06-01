@@ -5,6 +5,7 @@ import session from 'express-session';
 import fs from 'fs';
 import db from './db.js';
 import passport from './auth.js';
+import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
 
 // --- Init Express ---
 const app = express();
@@ -60,6 +61,21 @@ app.delete('/api/sessions/current', isLoggedIn, (req, res) => {
 
 app.get('/api/sessions/current', isLoggedIn, (req, res) => {
   res.json({ id: req.user.id, username: req.user.username });
+});
+
+// --- Network routes ---
+app.get('/api/network', async (req, res) => {
+  try {
+    const [stations, lines, lineStations, segments] = await Promise.all([
+      getAllStations(),
+      getAllLines(),
+      getLineStations(),
+      getSegments(),
+    ]);
+    res.json({ stations, lines, lineStations, segments });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to load network data' });
+  }
 });
 
 // --- Server check ---
