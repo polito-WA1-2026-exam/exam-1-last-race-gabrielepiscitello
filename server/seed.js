@@ -96,7 +96,7 @@ const events = [
 const users = [
   { username: 'alice', password: 'password123', salt: 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6' },
   { username: 'bob',   password: 'qwerty456',   salt: 'b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7' },
-  { username: 'carol', password: 'letmein789',  salt: 'c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8' },
+  { username: 'carol', password: 'password789',  salt: 'c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8' },
 ];
 
 (async () => {

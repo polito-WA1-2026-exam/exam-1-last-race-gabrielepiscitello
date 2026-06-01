@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import session from 'express-session';
 import fs from 'fs';
 import db from './db.js';
+import passport from './auth.js';
 
 // --- Init Express ---
 const app = express();
@@ -31,7 +32,37 @@ app.use(session({
   saveUninitialized: false,
 }));
 
-// --- Routes ---
+app.use(passport.initialize());
+app.use(passport.session());
+
+// --- Auth helper ---
+const isLoggedIn = (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  res.status(401).json({ error: 'Not authenticated' });
+};
+
+// --- Auth routes ---
+app.post('/api/sessions', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err)   return next(err);
+    if (!user) return res.status(401).json({ error: info?.message || 'Invalid credentials' });
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+      res.json({ id: user.id, username: user.username });
+    });
+  })(req, res, next);
+});
+
+app.delete('/api/sessions/current', isLoggedIn, (req, res) => {
+  req.logout(() => res.status(200).json({ message: 'Logged out' }));
+});
+
+app.get('/api/sessions/current', isLoggedIn, (req, res) => {
+  res.json({ id: req.user.id, username: req.user.username });
+});
+
+// --- Server check ---
 app.get('/api/ping', (req, res) => {
   res.json({ message: 'ok' });
 });
