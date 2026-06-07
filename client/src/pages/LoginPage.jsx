@@ -14,7 +14,7 @@ const LoginPage = () => {
 
   // Redirect already-logged-in users away from /login
   if (user) {
-    return <Navigate to="/game" replace />;
+    return <Navigate to="/" replace />;
   }
 
   const handleSubmit = async (e) => {
@@ -24,7 +24,7 @@ const LoginPage = () => {
     
     try {
       await login(username, password);
-      navigate('/game');
+      navigate('/');
     } catch (err) {
       setError(err.message || 'Invalid credentials');
     } finally {
