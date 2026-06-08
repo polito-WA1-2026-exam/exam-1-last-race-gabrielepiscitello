@@ -54,6 +54,14 @@ const SetupPage = () => {
   return (
     <Container className="mt-4 mb-5">
       <h2 className="text-center mb-4">Underground Network Map</h2>
+      <div className="text-center mb-4">
+        <img
+          src="/metroMap.png"
+          alt="Underground network map"
+          className="img-fluid rounded shadow"
+          style={{ maxHeight: '500px' }}
+        />
+      </div>
       <Row>
         {network.lines.map(line => {
           // Get stations for this line in order
