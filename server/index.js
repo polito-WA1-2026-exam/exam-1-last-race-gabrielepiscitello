@@ -6,6 +6,8 @@ import fs from 'fs';
 import db from './db.js';
 import passport from './auth.js';
 import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
+import { createGame } from './dao/gameDao.js';
+import { buildAdjacencyList, findValidPair } from './utils/networkUtils.js';
 
 // --- Init Express ---
 const app = express();
@@ -75,6 +77,28 @@ app.get('/api/network', async (req, res) => {
     res.json({ stations, lines, lineStations, segments });
   } catch (err) {
     res.status(500).json({ error: 'Failed to load network data' });
+  }
+});
+
+// --- Game routes ---
+app.post('/api/games', isLoggedIn, async (req, res) => {
+  try {
+    const [stations, lineStations] = await Promise.all([
+      getAllStations(),
+      getLineStations(),
+    ]);
+
+    const graph = buildAdjacencyList(lineStations);
+    const { startStation, destStation } = findValidPair(stations, graph);
+    const gameId = await createGame(req.user.id);
+
+    // Store game context in the session for later validation
+    req.session.currentGame = { gameId, startStationId: startStation.id, destStationId: destStation.id };
+
+    res.status(201).json({ gameId, startStation, destStation });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to start game' });
   }
 });
 
