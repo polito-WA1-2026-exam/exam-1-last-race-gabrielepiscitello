@@ -8,6 +8,7 @@ const PlanningPhase = ({ onPlanningDone }) => {
   const [error, setError] = useState('');
   const [timeLeft, setTimeLeft] = useState(90);         // countdown in seconds
   const [selectedSegments, setSelectedSegments] = useState([]); // ordered route built by the player
+  const [submitting, setSubmitting] = useState(false);  // true while POST /api/games/:id/route is in flight
 
   // useRef so the interval id survives re-renders without being a dependency
   const intervalRef = useRef(null);
@@ -24,14 +25,46 @@ const PlanningPhase = ({ onPlanningDone }) => {
 
   // Submit the route — called both manually and on timer expiry.
   // Wrapped in useCallback so it can safely be listed as a dependency of the timer effect.
-  const handleSubmit = useCallback((segments) => {
+  // gameInfoRef is used so the callback always has access to the latest gameInfo without
+  // being a dependency that would restart the timer effect on every render.
+  const gameInfoRef = useRef(null);
+  gameInfoRef.current = gameInfo;
+
+  const handleSubmit = useCallback(async (segments) => {
     // Stop the timer
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
-    // Pass segments up to GamePage
-    onPlanningDone({ segments });
+
+    const currentGame = gameInfoRef.current;
+    if (!currentGame) {
+      // No game started yet (edge case during loading) — just transition
+      onPlanningDone({ valid: false, steps: [], finalScore: 0 });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await fetch(`/api/games/${currentGame.gameId}/route`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ segments: segments.map(s => ({ from_id: s.from_id, to_id: s.to_id })) }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        // 422 validation error or 403 session mismatch — treat as invalid route
+        onPlanningDone({ valid: false, steps: [], finalScore: 0 });
+      } else {
+        onPlanningDone(data);
+      }
+    } catch {
+      // Network error — treat as invalid
+      onPlanningDone({ valid: false, steps: [], finalScore: 0 });
+    } finally {
+      setSubmitting(false);
+    }
   }, [onPlanningDone]);
 
   // Handle clicking a segment in the list
@@ -43,7 +76,7 @@ const PlanningPhase = ({ onPlanningDone }) => {
       if (lastSeg && lastSeg.from_id === seg.from_id && lastSeg.to_id === seg.to_id) {
         return prev.slice(0, -1);
       }
-      // Also allow backtracking when the segment was added in the reversed direction
+      // Also allow backtracking when the segment was traversed in the reversed direction
       if (lastSeg && lastSeg.from_id === seg.to_id && lastSeg.to_id === seg.from_id) {
         return prev.slice(0, -1);
       }
@@ -287,10 +320,13 @@ const PlanningPhase = ({ onPlanningDone }) => {
             <Button
               variant="primary"
               size="lg"
-              disabled={selectedSegments.length === 0}
+              disabled={selectedSegments.length === 0 || submitting}
               onClick={() => handleSubmit(selectedSegments)}
             >
-              Submit Route
+              {submitting
+                ? <><Spinner as="span" animation="border" size="sm" className="me-2" />Submitting...</>
+                : 'Submit Route'
+              }
             </Button>
           </div>
         </Col>

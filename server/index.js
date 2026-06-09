@@ -8,6 +8,7 @@ import passport from './auth.js';
 import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
 import { createGame } from './dao/gameDao.js';
 import { buildAdjacencyList, findValidPair } from './utils/networkUtils.js';
+import { check, validationResult } from 'express-validator';
 
 // --- Init Express ---
 const app = express();
@@ -47,7 +48,7 @@ const isLoggedIn = (req, res, next) => {
 // --- Auth routes ---
 app.post('/api/sessions', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
-    if (err)   return next(err);
+    if (err) return next(err);
     if (!user) return res.status(401).json({ error: info?.message || 'Invalid credentials' });
 
     req.login(user, (err) => {
@@ -101,6 +102,35 @@ app.post('/api/games', isLoggedIn, async (req, res) => {
     res.status(500).json({ error: 'Failed to start game' });
   }
 });
+
+// POST /api/games/:gameId/route — submit the planned route for validation and execution
+app.post(
+  '/api/games/:gameId/route',
+  isLoggedIn,
+  [
+    check('gameId').isInt({ min: 1 }).withMessage('gameId must be a positive integer').toInt(),
+    check('segments').isArray({ min: 1 }).withMessage('segments must be a non-empty array'),
+    check('segments.*.from_id').isInt().withMessage('each segment must have an integer from_id').toInt(),
+    check('segments.*.to_id').isInt().withMessage('each segment must have an integer to_id').toInt(),
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+
+    const gameId = parseInt(req.params.gameId, 10);
+    const { segments } = req.body;
+
+    // Verify the gameId matches the session's current game and belongs to this user
+    const currentGame = req.session.currentGame;
+    if (!currentGame || currentGame.gameId !== gameId) {
+      return res.status(403).json({ error: 'Game not found in session or does not belong to you' });
+    }
+
+    res.json({ valid: null, message: 'Route received' });
+  }
+);
 
 // --- Server check ---
 app.get('/api/ping', (req, res) => {
