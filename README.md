@@ -58,5 +58,10 @@
 - carol / password789
 
 ## Use of AI Tools
-Briefly describe whether you used any AI tools (e.g., ChatGPT, GitHub Copilot, Claude) while working on this project, for which purposes (e.g., clarifying concepts, debugging, generating code), and how you verified or adapted their output.
-If you did not use any AI tools, simply state so.
+AI assistance (Github Copilot and Gemini) was used in the following specific areas during development:
+
+- **Comments:** AI was used to write comments for every utility function (e.g., in `networkUtils.js` and `gameDao.js`) to improve code readability and document parameters and return types. All comments were reviewed and verified to accurately reflect the actual function behaviour.
+
+- **Algorithm design:** AI was used to design and implement the BFS-based functions in `server/utils/networkUtils.js`, specifically `buildAdjacencyList`, `bfsDistance`, and `findValidPair`. The logic was carefully reviewed to ensure correctness.
+
+All AI-generated output was manually reviewed, tested, and adapted where necessary. The overall architecture and design decisions were carried out independently.
