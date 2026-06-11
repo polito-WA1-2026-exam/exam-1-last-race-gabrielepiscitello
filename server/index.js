@@ -7,7 +7,7 @@ import db from './db.js';
 import passport from './auth.js';
 import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
 import { createGame } from './dao/gameDao.js';
-import { buildAdjacencyList, findValidPair } from './utils/networkUtils.js';
+import { buildAdjacencyList, findValidPair, validateRoute } from './utils/networkUtils.js';
 import { check, validationResult } from 'express-validator';
 
 // --- Init Express ---
@@ -128,7 +128,24 @@ app.post(
       return res.status(403).json({ error: 'Game not found in session or does not belong to you' });
     }
 
-    res.json({ valid: null, message: 'Route received' });
+    try {
+      const lineStations = await getLineStations();
+      const result = validateRoute(
+        segments,
+        currentGame.startStationId,
+        currentGame.destStationId,
+        lineStations
+      );
+
+      if (!result.valid) {
+        return res.json({ valid: false, reason: result.reason });
+      }
+
+      res.json({ valid: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Route validation failed' });
+    }
   }
 );
 
