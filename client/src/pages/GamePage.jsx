@@ -3,14 +3,7 @@ import { Navigate } from 'react-router';
 import { useUser } from '../contexts/UserContext';
 import PlanningPhase from '../components/PlanningPhase';
 import ExecutionPhase from '../components/ExecutionPhase';
-
-const ResultPhase = ({ finalScore, valid, onPlayAgain }) => (
-  <div className="container mt-4">
-    <h4>Result phase – coming soon</h4>
-    <p>Score: {finalScore} | Valid: {String(valid)}</p>
-    <button className="btn btn-success mt-3" onClick={onPlayAgain}>Play again (placeholder)</button>
-  </div>
-);
+import ResultPhase from '../components/ResultPhase';
 
 const GamePage = () => {
   const { user } = useUser();
