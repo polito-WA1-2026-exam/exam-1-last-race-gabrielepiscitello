@@ -6,7 +6,8 @@ import fs from 'fs';
 import db from './db.js';
 import passport from './auth.js';
 import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
-import { createGame } from './dao/gameDao.js';
+import { createGame, saveGameResult, saveGameSegment } from './dao/gameDao.js';
+import { getAllEvents } from './dao/eventsDao.js';
 import { buildAdjacencyList, findValidPair, validateRoute } from './utils/networkUtils.js';
 import { check, validationResult } from 'express-validator';
 
@@ -137,11 +138,34 @@ app.post(
         lineStations
       );
 
+      req.session.currentGame = null;
+
       if (!result.valid) {
-        return res.json({ valid: false, reason: result.reason });
+        await saveGameResult(gameId, 0);
+        return res.json({ valid: false, reason: result.reason, finalScore: 0 });
       }
 
-      res.json({ valid: true });
+      // Execute the valid route: apply a random event per segment
+      const [events, stations] = await Promise.all([getAllEvents(), getAllStations()]);
+      const stationName = new Map(stations.map(s => [s.id, s.name]));
+      let coins = 20;
+      const steps = [];
+
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        const event = events[Math.floor(Math.random() * events.length)];
+        coins = Math.max(0, coins + event.effect);
+        await saveGameSegment(gameId, i, seg.from_id, seg.to_id, event.id, coins);
+        steps.push({
+          from: { id: seg.from_id, name: stationName.get(seg.from_id) },
+          to:   { id: seg.to_id,   name: stationName.get(seg.to_id)   },
+          event: { description: event.description, effect: event.effect },
+          coinsAfter: coins,
+        });
+      }
+
+      await saveGameResult(gameId, coins);
+      res.json({ valid: true, steps, finalScore: coins });
     } catch (err) {
       console.error(err);
       res.status(500).json({ error: 'Route validation failed' });

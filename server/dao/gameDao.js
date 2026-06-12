@@ -41,6 +41,17 @@ export const saveGameResult = async (gameId, score) => {
 };
 
 /**
+ * Insert one step of the execution phase into game_segments.
+ */
+export const saveGameSegment = async (gameId, order, fromId, toId, eventId, coinsAfter) => {
+  await run(
+    `INSERT INTO game_segments (game_id, segment_order, from_station_id, to_station_id, event_id, coins_after)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [gameId, order, fromId, toId, eventId, coinsAfter]
+  );
+};
+
+/**
  * Return the best (highest) score per user, ordered descending.
  * Only includes games that have a score (completed games).
  */

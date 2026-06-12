@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { Navigate } from 'react-router';
 import { useUser } from '../contexts/UserContext';
 import PlanningPhase from '../components/PlanningPhase';
-
-// Placeholder components for phases not yet implemented
-const ExecutionPhase = ({ steps, onDone }) => (
-  <div className="container mt-4">
-    <h4>Execution phase – coming soon</h4>
-    <button className="btn btn-primary mt-3" onClick={onDone}>Skip to result (placeholder)</button>
-  </div>
-);
+import ExecutionPhase from '../components/ExecutionPhase';
 
 const ResultPhase = ({ finalScore, valid, onPlayAgain }) => (
   <div className="container mt-4">
