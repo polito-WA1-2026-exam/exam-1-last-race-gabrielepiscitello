@@ -6,7 +6,7 @@ import fs from 'fs';
 import db from './db.js';
 import passport from './auth.js';
 import { getAllStations, getAllLines, getLineStations, getSegments } from './dao/networkDao.js';
-import { createGame, saveGameResult, saveGameSegment } from './dao/gameDao.js';
+import { createGame, saveGameResult, saveGameSegment, getBestScores } from './dao/gameDao.js';
 import { getAllEvents } from './dao/eventsDao.js';
 import { buildAdjacencyList, findValidPair, validateRoute } from './utils/networkUtils.js';
 import { check, validationResult } from 'express-validator';
@@ -172,6 +172,17 @@ app.post(
     }
   }
 );
+
+// --- Ranking route ---
+app.get('/api/ranking', isLoggedIn, async (req, res) => {
+  try {
+    const scores = await getBestScores();
+    res.json(scores);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to load ranking' });
+  }
+});
 
 // --- Server check ---
 app.get('/api/ping', (req, res) => {
