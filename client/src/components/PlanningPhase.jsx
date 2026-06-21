@@ -110,6 +110,11 @@ const PlanningPhase = ({ onPlanningDone }) => {
     });
   };
 
+  // Set page title once on mount
+  useEffect(() => {
+    document.title = 'Planning – Last Race';
+  }, []);
+
   // On mount: start a game and fetch the network in parallel
   useEffect(() => {
     const initGame = async () => {

@@ -1,12 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Container, Card, Badge, Button, ProgressBar } from 'react-bootstrap';
 
 const ExecutionPhase = ({ steps, onDone }) => {
   const [currentStep, setCurrentStep] = useState(0);
+  // Prevents accidental double-advance when clicking the next-step button rapidly
+  const [advancing, setAdvancing] = useState(false);
+
+  useEffect(() => {
+    document.title = 'Journey – Last Race';
+  }, []);
 
   const step = steps[currentStep];
   const isLast = currentStep === steps.length - 1;
   const stepNumber = currentStep + 1;
+
+  const handleNext = () => {
+    if (advancing) return;
+    setAdvancing(true);
+    setCurrentStep(s => s + 1);
+    setTimeout(() => setAdvancing(false), 400);
+  };
 
   const effectBadge = (effect) => {
     if (effect > 0) return <Badge bg="success" className="fs-6">+{effect}</Badge>;
@@ -59,7 +72,7 @@ const ExecutionPhase = ({ steps, onDone }) => {
         </div>
       ) : (
         <div className="d-grid">
-          <Button variant="primary" size="lg" onClick={() => setCurrentStep(s => s + 1)}>
+          <Button variant="primary" size="lg" onClick={handleNext} disabled={advancing}>
             Next stop →
           </Button>
         </div>

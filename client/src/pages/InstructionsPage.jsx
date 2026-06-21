@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
 import { Container, Card, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router';
 
 const InstructionsPage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Last Race';
+  }, []);
 
   return (
     <Container className="mt-5">

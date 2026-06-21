@@ -1,17 +1,27 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router';
+import { Container, Spinner } from 'react-bootstrap';
 import { useUser } from '../contexts/UserContext';
 import PlanningPhase from '../components/PlanningPhase';
 import ExecutionPhase from '../components/ExecutionPhase';
 import ResultPhase from '../components/ResultPhase';
 
 const GamePage = () => {
-  const { user } = useUser();
+  const { user, authLoading } = useUser();
 
   // Phase: 'planning' | 'execution' | 'result'
   const [phase, setPhase] = useState('planning');
   const [executionData, setExecutionData] = useState(null); // { steps, valid }
   const [resultData, setResultData] = useState(null);       // { finalScore, valid }
+
+  // Wait for session check before deciding to redirect
+  if (authLoading) {
+    return (
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" role="status" />
+      </Container>
+    );
+  }
 
   // Redirect anonymous users to the home/login page
   if (!user) {

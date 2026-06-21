@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Navigate } from 'react-router';
 import { Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 import { useUser } from '../contexts/UserContext';
@@ -8,9 +8,13 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { user, login } = useUser();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Login – Last Race';
+  }, []);
 
   // Redirect already-logged-in users away from /login
   if (user) {

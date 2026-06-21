@@ -9,6 +9,10 @@ const SetupPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    document.title = 'Network Map – Last Race';
+  }, []);
+
+  useEffect(() => {
     fetch('/api/network')
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch network data');

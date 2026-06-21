@@ -1,16 +1,21 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, Navigate } from 'react-router';
 import { Container, Table, Button, Spinner, Alert } from 'react-bootstrap';
 import { useUser } from '../contexts/UserContext';
 
 const RankingPage = () => {
-  const { user } = useUser();
+  const { user, authLoading } = useUser();
   const navigate = useNavigate();
   const [scores, setScores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
+    document.title = 'Leaderboard – Last Race';
+  }, []);
+
+  useEffect(() => {
+    if (authLoading || !user) return;
     fetch('/api/ranking', { credentials: 'include' })
       .then(res => {
         if (!res.ok) throw new Error('Failed to load ranking');
@@ -19,7 +24,19 @@ const RankingPage = () => {
       .then(data => setScores(data))
       .catch(err => setError(err.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [authLoading, user]);
+
+  if (authLoading) {
+    return (
+      <Container className="mt-5 text-center">
+        <Spinner animation="border" role="status" />
+      </Container>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/" replace />;
+  }
 
   return (
     <Container className="mt-4 mb-5" style={{ maxWidth: '600px' }}>

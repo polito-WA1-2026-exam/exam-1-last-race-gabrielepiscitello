@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Container, Card, Button, Alert } from 'react-bootstrap';
 
 const ResultPhase = ({ finalScore, valid, onPlayAgain }) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.title = 'Result – Last Race';
+  }, []);
 
   const getMessage = () => {
     if (!valid) return null;

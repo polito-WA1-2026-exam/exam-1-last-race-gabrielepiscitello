@@ -4,6 +4,8 @@ export const UserContext = createContext(null);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  // true while the initial session check is in flight — prevents premature redirects
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Restore session on mount
   useEffect(() => {
@@ -15,7 +17,8 @@ export const UserProvider = ({ children }) => {
       .then((data) => {
         if (data) setUser(data);
       })
-      .catch(() => {}); // silently ignore network errors
+      .catch(() => {})
+      .finally(() => setAuthLoading(false));
   }, []);
 
   const login = async (username, password) => {
@@ -40,7 +43,7 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, authLoading, login, logout }}>
       {children}
     </UserContext.Provider>
   );
