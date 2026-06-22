@@ -74,7 +74,7 @@ app.get('/api/sessions/current', isLoggedIn, (req, res) => {
 });
 
 // --- Network routes ---
-app.get('/api/network', async (req, res) => {
+app.get('/api/network', isLoggedIn, async (req, res) => {
   try {
     const [stations, lines, lineStations, segments] = await Promise.all([
       getAllStations(),

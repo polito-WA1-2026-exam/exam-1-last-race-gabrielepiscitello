@@ -13,7 +13,7 @@ const SetupPage = () => {
   }, []);
 
   useEffect(() => {
-    fetch('/api/network')
+    fetch('/api/network', { credentials: 'include' })
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch network data');
         return res.json();
