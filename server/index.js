@@ -15,12 +15,6 @@ import { check, validationResult } from 'express-validator';
 const app = express();
 const port = 3001;
 
-// --- Run DB schema ---
-const schema = fs.readFileSync('./schema.sql', 'utf-8');
-db.exec(schema, (err) => {
-  if (err) throw err;
-});
-
 // --- Middleware ---
 app.use(morgan('dev'));
 
@@ -201,7 +195,14 @@ app.get('/api/ping', (req, res) => {
   res.json({ message: 'ok' });
 });
 
-// --- Start server ---
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}`);
+// --- Run DB schema, then start server ---
+const schema = fs.readFileSync('./schema.sql', 'utf-8');
+db.exec(schema, (err) => {
+  if (err) {
+    console.error('Failed to apply schema:', err);
+    process.exit(1);
+  }
+  app.listen(port, () => {
+    console.log(`Server listening at http://localhost:${port}`);
+  });
 });

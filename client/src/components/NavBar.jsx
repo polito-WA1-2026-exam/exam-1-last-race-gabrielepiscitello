@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router';
+import { useNavigate, Link } from 'react-router';
 import { Navbar, Nav, Button, Container } from 'react-bootstrap';
 import { useUser } from '../contexts/UserContext';
 
@@ -14,7 +14,7 @@ const NavBar = () => {
   return (
     <Navbar bg="dark" variant="dark" expand="lg">
       <Container>
-        <Navbar.Brand href="/">Last Race</Navbar.Brand>
+        <Navbar.Brand as={Link} to="/">Last Race</Navbar.Brand>
         <Nav className="ms-auto align-items-center">
           {user ? (
             <>
