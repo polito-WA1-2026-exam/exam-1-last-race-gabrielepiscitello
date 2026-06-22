@@ -114,5 +114,7 @@ AI assistance (Github Copilot and Gemini) was used in the following specific are
 
 - **Bug fixing:** AI helped identify and fix a some bugs.
 
+- **README documentation:** AI was used to write the API documentation (HTTP routes, parameters, and response formats) and the database tables description in this README. All content was reviewed and verified to match the actual implementation.
+
 
 All AI-generated output was manually reviewed, tested, and adapted where necessary. The overall architecture, database schema design, and game rules implementation were carried out independently.
