@@ -86,6 +86,14 @@
 
 ---
 
+## Screenshots
+
+![Ranking](./img/ranking.png)
+
+![Game](./img/game.png)
+
+---
+
 ## Users Credentials
 
 | Username | Password    |
