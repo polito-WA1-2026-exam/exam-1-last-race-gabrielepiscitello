@@ -133,6 +133,16 @@ export const validateRoute = (segments, startStationId, destStationId, lineStati
     return { valid: false, reason: 'Route does not end at the assigned destination.' };
   }
 
+  // No segment may be used more than once (A→B and B→A count as the same segment)
+  const usedSegments = new Set();
+  for (let i = 0; i < segments.length; i++) {
+    const key = `${Math.min(segments[i].from_id, segments[i].to_id)}-${Math.max(segments[i].from_id, segments[i].to_id)}`;
+    if (usedSegments.has(key)) {
+      return { valid: false, reason: `Segment ${i + 1} has already been used in this route.` };
+    }
+    usedSegments.add(key);
+  }
+
   // End of segment i must equal start of segment i+1
   for (let i = 0; i < segments.length - 1; i++) {
     if (segments[i].to_id !== segments[i + 1].from_id) {

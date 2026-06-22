@@ -81,6 +81,12 @@ const PlanningPhase = ({ onPlanningDone }) => {
         return prev.slice(0, -1);
       }
 
+      // Helper: is this segment already used in the route (either direction)?
+      const alreadyUsed = prev.some(s =>
+        (s.from_id === seg.from_id && s.to_id === seg.to_id) ||
+        (s.from_id === seg.to_id   && s.to_id === seg.from_id)
+      );
+
       // Case 2: first segment — only accept if it starts or ends at the starting station
       if (prev.length === 0) {
         if (seg.from_id === gameInfo.startStation.id) {
@@ -93,6 +99,9 @@ const PlanningPhase = ({ onPlanningDone }) => {
         // Segment doesn't touch the start station — ignore
         return prev;
       }
+
+      // Segment already in route — ignore (each segment may be used only once)
+      if (alreadyUsed) return prev;
 
       // Case 3: subsequent segment — must connect to the last station in the route
       const lastStationId = lastSeg.to_id;
